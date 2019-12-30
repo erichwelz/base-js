@@ -1,0 +1,15 @@
+{
+  "name": "setup-unit-test",
+  "version": "1.0.0",
+  "description": "this project demonstrates how to write unit test in javascript by using jest framework ",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "javascript",
+    "jest"
+  ],
+  "author": "Tran Son Hoang <Tran.SonHoang@allianz.com.my> (https://www.hoangtran.co)",
+  "license": "ISC"
+}
