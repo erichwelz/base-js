@@ -10,15 +10,15 @@ const isInteger = number => number === parseInt(number, 10);
 
 const covertToOrdinalNubmer = num => {
     if(isNegative(num)) {
-        return new Error('number is negative');
+        throw new Error('number is negative');
     }
 
     if(isNotNumber(num)) {
-        return new Error(`cannot convert ${num} to ordinal number`);
+        throw new Error(`cannot convert ${num} to ordinal number`);
     }
 
     if(!isInteger(num)) {
-        return new Error('cannot convert float number');
+        throw new Error('cannot convert float number');
     }
 
     return num % 10 in POSITIONS ? `${num}${POSITIONS[num%10]}` : `${num}th`;

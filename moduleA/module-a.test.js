@@ -18,41 +18,15 @@ describe("Ordinal Number", () => {
     });
 
     test("-1 should throw error 'number is negative'", () => {
-        let result;
-        try {
-            result = covertToOrdinalNubmer(1);
-        }catch(err) {
-            expect(err.message).toBe('number is negative');
-        }
-        
+        expect(() => covertToOrdinalNubmer(-1)).toThrowError('number is negative');
     });
 
     test("a should throw error 'cannot convert a to ordinal number'", () => {
-        let result;
-        try {
-            result = covertToOrdinalNubmer('a');
-        }catch(err) {
-            expect(err.message).toBe('cannot convert a to ordinal number');
-        }
-        
+        expect(() => covertToOrdinalNubmer('a')).toThrowError("cannot convert a to ordinal number");
     });
 
-    test("a should throw error 'cannot convert a to ordinal number'", () => {
-        let result;
-        try {
-            result = covertToOrdinalNubmer('a');
-        }catch(err) {
-            expect(err.message).toBe('cannot convert a to ordinal number');
-        }
-        
-    });
 
     test("3.14 should throw error 'cannot convert float number'", () => {
-        let result;
-        try {
-            result = covertToOrdinalNubmer(3.14);
-        }catch(err) {
-            expect(err.message).toBe('cannot convert float number');
-        }
+        expect(() => covertToOrdinalNubmer(3.14)).toThrowError("cannot convert float number");
     });
 })
