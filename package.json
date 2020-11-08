@@ -2,14 +2,25 @@
   "name": "setup-unit-test",
   "version": "1.0.0",
   "description": "this project demonstrates how to write unit test in javascript by using jest framework ",
+  "engines": {
+    "node": ">=12"
+  },
+  "devDependencies": {
+    "jest": "^25.1.0",
+    "standard": "^16.0.1"
+  },
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "unit": "jest",
+    "unit:watch": "jest --watchAll",
+    "unit:watch:noCoverage": "jest --watchAll --collectCoverage=false"
   },
   "keywords": [
     "javascript",
     "jest"
   ],
-  "author": "Tran Son Hoang <son.hoang@gmail.com> (https://www.hoangtran.co)",
-  "license": "ISC"
+  "license": "ISC",
+  "standard": {
+    "env": [ "jest" ]
+  }
 }
