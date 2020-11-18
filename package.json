@@ -21,6 +21,11 @@
   ],
   "license": "ISC",
   "standard": {
-    "env": [ "jest" ]
+    "env": [
+      "jest"
+    ]
+  },
+  "dependencies": {
+    "ramda": "^0.27.1"
   }
 }
