@@ -14,26 +14,26 @@ const schedule = (buildings, employees) => {
   const scheduledEmployeeIds = []
   buildings.forEach(building => {
     // METHOD with deprecating employee that updated array giving trouble with test fixtures
-    // if (building.buildingType === BUILDING_TYPES.SSHOME) {
-    //   const index = employees.findIndex(e => !e.employeeId && e.employeeType === EMPLOYEE_TYPES.CINSTALLER)
-    //   if (index > -1) {
-    //     const employee = employees[index]
-    //     employee.available = false
-    //     schedule.push(Job({ buildingId: building.id, employeeIds: [employee.id] }))
-    //   }
-    // }
-
     if (building.buildingType === BUILDING_TYPES.SSHOME) {
-      const index = employees.findIndex(
-        e => e.employeeType === EMPLOYEE_TYPES.CINSTALLER &&
-        !scheduledEmployeeIds.includes(e.id)
-      )
+      const index = employees.findIndex(e => e.available && e.employeeType === EMPLOYEE_TYPES.CINSTALLER)
       if (index > -1) {
         const employee = employees[index]
-        scheduledEmployeeIds.push(employee.id)
+        employee.available = false
         schedule.push(Job({ buildingId: building.id, employeeIds: [employee.id] }))
       }
     }
+
+    // if (building.buildingType === BUILDING_TYPES.SSHOME) {
+    //   const index = employees.findIndex(
+    //     e => e.employeeType === EMPLOYEE_TYPES.CINSTALLER &&
+    //     !scheduledEmployeeIds.includes(e.id)
+    //   )
+    //   if (index > -1) {
+    //     const employee = employees[index]
+    //     scheduledEmployeeIds.push(employee.id)
+    //     schedule.push(Job({ buildingId: building.id, employeeIds: [employee.id] }))
+    //   }
+    // }
 
     if (building.buildingType === BUILDING_TYPES.TSHOME) {
       const cinstaller = employees.findIndex(e =>
