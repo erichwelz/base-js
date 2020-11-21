@@ -1,4 +1,4 @@
-const { BUILDING_TYPES, EMPLOYEE_TYPES, Employee, Building, Job } = require('./models')
+const { BUILDING_TYPES, EMPLOYEE_TYPES, Job } = require('./models')
 
 // buildings is an array of buildings...
 // employees is an array of employees
@@ -11,9 +11,8 @@ const { BUILDING_TYPES, EMPLOYEE_TYPES, Employee, Building, Job } = require('./m
 
 const schedule = (buildings, employees) => {
   const schedule = []
-  const scheduledEmployeeIds = []
+
   buildings.forEach(building => {
-    // METHOD with deprecating employee that updated array giving trouble with test fixtures
     if (building.buildingType === BUILDING_TYPES.SSHOME) {
       const index = employees.findIndex(e => e.available && e.employeeType === EMPLOYEE_TYPES.CINSTALLER)
       if (index > -1) {
@@ -23,45 +22,41 @@ const schedule = (buildings, employees) => {
       }
     }
 
-    // if (building.buildingType === BUILDING_TYPES.SSHOME) {
-    //   const index = employees.findIndex(
-    //     e => e.employeeType === EMPLOYEE_TYPES.CINSTALLER &&
-    //     !scheduledEmployeeIds.includes(e.id)
-    //   )
-    //   if (index > -1) {
-    //     const employee = employees[index]
-    //     scheduledEmployeeIds.push(employee.id)
-    //     schedule.push(Job({ buildingId: building.id, employeeIds: [employee.id] }))
-    //   }
-    // }
-
     if (building.buildingType === BUILDING_TYPES.TSHOME) {
-      const cinstaller = employees.findIndex(e =>
+      const jobEmployeeIds = []
+      const cInstaller = employees.findIndex(e =>
+        e.available &&
         e.employeeType === EMPLOYEE_TYPES.CINSTALLER &&
-        !scheduledEmployeeIds.includes(e.id)
+        !jobEmployeeIds.includes(e.id)
       )
+
+      jobEmployeeIds.push(employees[cInstaller].id)
       const otherInstaller = employees.findIndex(e =>
-        !scheduledEmployeeIds.includes(e.id) && (
+        e.available &&
+        !jobEmployeeIds.includes(e.id) && (
           e.employeeType === EMPLOYEE_TYPES.PINSTALLER ||
           e.employeeType === EMPLOYEE_TYPES.HANDYMAN
         )
       )
 
-      if (cinstaller > -1 && otherInstaller > -1) {
-        const cEmployee = employees[cinstaller]
+      if (cInstaller > -1 && otherInstaller > -1) {
+        const cEmployee = employees[cInstaller]
         const otherEmployee = employees[otherInstaller]
-        scheduledEmployeeIds.push(cEmployee.id)
-        scheduledEmployeeIds.push(otherEmployee.id)
 
-        schedule.push(Job({ buildingId: building.id, employeeIds: [cEmployee.id, otherEmployee.id] }))
+        const employeeIds = [employees[cInstaller].id, employees[otherInstaller].id]
+
+        cEmployee.available = false
+        otherEmployee.available = false
+
+        schedule.push(Job({ buildingId: building.id, employeeIds }))
       }
     }
 
     if (building.buildingType === BUILDING_TYPES.COMMERCIAL) {
       const jobEmployeeIds = []
       const cEmployees = employees.filter(e =>
-        e.employeeType === EMPLOYEE_TYPES.CINSTALLER &&
-        !scheduledEmployeeIds.includes(e.id)
+        e.available &&
+        e.employeeType === EMPLOYEE_TYPES.CINSTALLER
       )
 
       if (cEmployees.length >= 2) {
@@ -71,8 +66,8 @@ const schedule = (buildings, employees) => {
       }
 
       const pEmployees = employees.filter(e =>
+        e.available &&
         e.employeeType === EMPLOYEE_TYPES.PINSTALLER &&
-        !scheduledEmployeeIds.includes(e.id) &&
         !jobEmployeeIds.includes(e.id)
 
       )
@@ -84,7 +79,7 @@ const schedule = (buildings, employees) => {
       }
 
       const otherEmployees = employees.filter(e =>
-        !scheduledEmployeeIds.includes(e.id) &&
+        e.available &&
         !jobEmployeeIds.includes(e.id)
       )
 
@@ -96,7 +91,12 @@ const schedule = (buildings, employees) => {
 
       if (cEmployees.length >= 2 && pEmployees.length >= 2 && otherEmployees.length >= 4) {
         // take resources out of running if enough people available
-        scheduledEmployeeIds.push(jobEmployeeIds)
+        employees.forEach(employee => {
+          if (jobEmployeeIds.includes(employee.id)) {
+            employee.available = false
+          }
+        })
+
         schedule.push(Job({ buildingId: building.id, employeeIds: jobEmployeeIds }))
       }
     }

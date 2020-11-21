@@ -34,19 +34,19 @@ describe('schedule Single Story Home - single day', () => {
 
 const doubleHome = Building({ id: 223, buildingType: BUILDING_TYPES.TSHOME })
 const doubleHome2 = Building({ id: 224, buildingType: BUILDING_TYPES.TSHOME })
-const pEmployee1 = Employee({ id: 201, employeeType: EMPLOYEE_TYPES.PINSTALLER, available: true })
-const hEmployee1 = Employee({ id: 301, employeeType: EMPLOYEE_TYPES.HANDYMAN, available: true })
+const pEmployee1 = () => Employee({ id: 201, employeeType: EMPLOYEE_TYPES.PINSTALLER, available: true })
+const hEmployee1 = () => Employee({ id: 301, employeeType: EMPLOYEE_TYPES.HANDYMAN, available: true })
 
 describe('schedule two story Home - single day', () => {
   it('can schedule a two story home with certified installer & pending certified installer', () => {
     const tsHomeSchedule = Job({ buildingId: 223, employeeIds: [101, 201] })
-    expect(schedule([doubleHome], [cEmployee1(), pEmployee1]))
+    expect(schedule([doubleHome], [cEmployee1(), pEmployee1()]))
       .toEqual([tsHomeSchedule])
   })
 
   it('can schedule a two story home with certified installer & one handyman', () => {
     const tsHomeSchedule = Job({ buildingId: 223, employeeIds: [101, 301] })
-    expect(schedule([doubleHome], [cEmployee1(), hEmployee1]))
+    expect(schedule([doubleHome], [cEmployee1(), hEmployee1()]))
       .toEqual([tsHomeSchedule])
   })
 
@@ -55,7 +55,7 @@ describe('schedule two story Home - single day', () => {
       Job({ buildingId: 223, employeeIds: [101, 201] }),
       Job({ buildingId: 224, employeeIds: [102, 301] })
     ]
-    expect(schedule([doubleHome, doubleHome2], [cEmployee1(), cEmployee2(), pEmployee1, hEmployee1]))
+    expect(schedule([doubleHome, doubleHome2], [cEmployee1(), cEmployee2(), pEmployee1(), hEmployee1()]))
       .toEqual(tsHomeSchedule)
   })
 })
@@ -63,7 +63,7 @@ describe('schedule two story Home - single day', () => {
 const commercial = Building({ id: 323, buildingType: BUILDING_TYPES.COMMERCIAL })
 // const commercial2 = Building({ id: 324, buildingType: BUILDING_TYPES.COMMERCIAL })
 
-const pEmployee2 = Employee({ id: 202, employeeType: EMPLOYEE_TYPES.PINSTALLER, available: true })
+const pEmployee2 = () => Employee({ id: 202, employeeType: EMPLOYEE_TYPES.PINSTALLER, available: true })
 
 const handyManFactory = (ids = [301]) => ids.map(id =>
   Employee({ id, employeeType: EMPLOYEE_TYPES.HANDYMAN, available: true })
@@ -72,7 +72,13 @@ const handyManFactory = (ids = [301]) => ids.map(id =>
 describe('schedule commercial property', () => {
   it('can schedule a commercial home with correct resourcing', () => {
     const commercialSchedule = Job({ buildingId: 323, employeeIds: [101, 102, 201, 202, 301, 302, 303, 304] })
-    expect(schedule([commercial], [...handyManFactory([301, 302, 303, 304]), pEmployee1, pEmployee2, ...cInstallerFactory([101, 102])]))
+    expect(schedule([commercial], [...handyManFactory([301, 302, 303, 304]), pEmployee1(), pEmployee2(), ...cInstallerFactory([101, 102])]))
+      .toEqual([commercialSchedule])
+  })
+
+  it('can not schedule two commercial homes with inadequate resourcing', () => {
+    const commercialSchedule = Job({ buildingId: 323, employeeIds: [101, 102, 201, 202, 301, 302, 303, 304] })
+    expect(schedule([commercial, commercial], [...handyManFactory([301, 302, 303, 304]), pEmployee1(), pEmployee2(), ...cInstallerFactory([101, 102])]))
       .toEqual([commercialSchedule])
   })
 })
