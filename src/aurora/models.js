@@ -1,13 +1,28 @@
-const BUILDING_TYPES = {
-  SSHOME: 'Single Story Home',
-  TSHOME: 'Two Story Home',
-  COMMERCIAL: 'Commercial Building'
-}
-
 const EMPLOYEE_TYPES = {
   CINSTALLER: 'Certified Installer',
   PINSTALLER: 'Installer pending certification',
   HANDYMAN: 'Handyman'
+}
+
+const ALL_EMPLOYEE_TYPES = Object.values(EMPLOYEE_TYPES)
+
+const BUILDING_TYPES = {
+  SSHOME: { name: 'Single Story Home', resources: [{ employeeType: EMPLOYEE_TYPES.CINSTALLER, number: 1 }] },
+  TSHOME: {
+    name: 'Two Story Home',
+    resources: [
+      { employeeType: EMPLOYEE_TYPES.CINSTALLER, number: 1 },
+      { employeeType: [EMPLOYEE_TYPES.PINSTALLER, EMPLOYEE_TYPES.HANDYMAN], number: 1 }
+    ]
+  },
+  COMMERCIAL: {
+    name: 'Commercial Building',
+    resources: [
+      { employeeType: EMPLOYEE_TYPES.CINSTALLER, number: 2 },
+      { employeeType: EMPLOYEE_TYPES.PINSTALLER, number: 2 },
+      { employeeType: ALL_EMPLOYEE_TYPES, number: 4 }
+    ]
+  }
 }
 
 // available bool
