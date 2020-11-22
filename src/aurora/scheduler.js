@@ -8,95 +8,108 @@ const { BUILDING_TYPES, EMPLOYEE_TYPES, Job } = require('./models')
 // const buildingRequirements: {
 //   EMPLOYEE_TYPES.cEmployee =
 // }
+const SSHOME = [
+  { employeeType: EMPLOYEE_TYPES.CINSTALLER, number: 1 }
+]
+
+const TSHOME = [
+  { employeeType: EMPLOYEE_TYPES.CINSTALLER, number: 1 },
+  { employeeType: [EMPLOYEE_TYPES.PINSTALLER, EMPLOYEE_TYPES.HANDYMAN], number: 1 }
+]
+const ALL_EMPLOYEE_TYPES = Object.values(EMPLOYEE_TYPES)
+
+const COMMERCIAL = [
+  { employeeType: EMPLOYEE_TYPES.CINSTALLER, number: 2 },
+  { employeeType: EMPLOYEE_TYPES.PINSTALLER, number: 2 },
+  { employeeType: ALL_EMPLOYEE_TYPES, number: 4 }
+]
 
 const schedule = (buildings, employees) => {
   const schedule = []
 
   buildings.forEach(building => {
+    const availableEmployees = employees.filter(e => e.available === true)
+
     if (building.buildingType === BUILDING_TYPES.SSHOME) {
-      const index = employees.findIndex(e => e.available && e.employeeType === EMPLOYEE_TYPES.CINSTALLER)
-      if (index > -1) {
-        const employee = employees[index]
-        employee.available = false
-        schedule.push(Job({ buildingId: building.id, employeeIds: [employee.id] }))
+      const jobEmployeeIds = []
+
+      SSHOME.forEach(({ employeeType, number }) => {
+        const employeeTypeIds = availableEmployees
+          .filter(e => employeeType.includes(e.employeeType) &&
+          !jobEmployeeIds.includes(e.id))
+          .map(x => { return x.id })
+          .slice(0, number)
+
+        jobEmployeeIds.push(...employeeTypeIds)
+      })
+
+      const numberOfEmployeesRequired = SSHOME
+        .map(x => { return x.number })
+        .reduce((total, amount) => total + amount)
+
+      if (jobEmployeeIds.length === numberOfEmployeesRequired) {
+        // marks resources unvailable if enough people available
+        availableEmployees.forEach(e => {
+          if (jobEmployeeIds.includes(e.id)) {
+            e.available = false
+          }
+        })
+        schedule.push(Job({ buildingId: building.id, employeeIds: jobEmployeeIds }))
       }
     }
 
     if (building.buildingType === BUILDING_TYPES.TSHOME) {
       const jobEmployeeIds = []
-      const cInstaller = employees.findIndex(e =>
-        e.available &&
-        e.employeeType === EMPLOYEE_TYPES.CINSTALLER &&
-        !jobEmployeeIds.includes(e.id)
-      )
 
-      jobEmployeeIds.push(employees[cInstaller].id)
-      const otherInstaller = employees.findIndex(e =>
-        e.available &&
-        !jobEmployeeIds.includes(e.id) && (
-          e.employeeType === EMPLOYEE_TYPES.PINSTALLER ||
-          e.employeeType === EMPLOYEE_TYPES.HANDYMAN
-        )
-      )
+      TSHOME.forEach(({ employeeType, number }) => {
+        const employeeTypeIds = availableEmployees
+          .filter(e => employeeType.includes(e.employeeType) &&
+          !jobEmployeeIds.includes(e.id))
+          .map(x => { return x.id })
+          .slice(0, number)
 
-      if (cInstaller > -1 && otherInstaller > -1) {
-        const cEmployee = employees[cInstaller]
-        const otherEmployee = employees[otherInstaller]
+        jobEmployeeIds.push(...employeeTypeIds)
+      })
 
-        const employeeIds = [employees[cInstaller].id, employees[otherInstaller].id]
+      const numberOfEmployeesRequired = TSHOME
+        .map(x => { return x.number })
+        .reduce((total, amount) => total + amount)
 
-        cEmployee.available = false
-        otherEmployee.available = false
-
-        schedule.push(Job({ buildingId: building.id, employeeIds }))
+      if (jobEmployeeIds.length === numberOfEmployeesRequired) {
+        // marks resources unvailable if enough people available
+        availableEmployees.forEach(e => {
+          if (jobEmployeeIds.includes(e.id)) {
+            e.available = false
+          }
+        })
+        schedule.push(Job({ buildingId: building.id, employeeIds: jobEmployeeIds }))
       }
     }
 
     if (building.buildingType === BUILDING_TYPES.COMMERCIAL) {
       const jobEmployeeIds = []
-      const cEmployees = employees.filter(e =>
-        e.available &&
-        e.employeeType === EMPLOYEE_TYPES.CINSTALLER
-      )
 
-      if (cEmployees.length >= 2) {
-        cEmployees.slice(0, 2).forEach(e => {
-          jobEmployeeIds.push(e.id)
-        })
-      }
+      COMMERCIAL.forEach(({ employeeType, number }) => {
+        const employeeTypeIds = availableEmployees
+          .filter(e => employeeType.includes(e.employeeType) &&
+          !jobEmployeeIds.includes(e.id))
+          .map(x => { return x.id })
+          .slice(0, number)
 
-      const pEmployees = employees.filter(e =>
-        e.available &&
-        e.employeeType === EMPLOYEE_TYPES.PINSTALLER &&
-        !jobEmployeeIds.includes(e.id)
+        jobEmployeeIds.push(...employeeTypeIds)
+      })
 
-      )
+      const numberOfEmployeesRequired = COMMERCIAL
+        .map(x => { return x.number })
+        .reduce((total, amount) => total + amount)
 
-      if (pEmployees.length >= 2) {
-        pEmployees.slice(0, 2).forEach(e => {
-          jobEmployeeIds.push(e.id)
-        })
-      }
-
-      const otherEmployees = employees.filter(e =>
-        e.available &&
-        !jobEmployeeIds.includes(e.id)
-      )
-
-      if (otherEmployees.length >= 4) {
-        otherEmployees.slice(0, 4).forEach(e => {
-          jobEmployeeIds.push(e.id)
-        })
-      }
-
-      if (cEmployees.length >= 2 && pEmployees.length >= 2 && otherEmployees.length >= 4) {
-        // take resources out of running if enough people available
-        employees.forEach(employee => {
-          if (jobEmployeeIds.includes(employee.id)) {
-            employee.available = false
+      if (jobEmployeeIds.length === numberOfEmployeesRequired) {
+        // marks resources unvailable if enough people available
+        availableEmployees.forEach(e => {
+          if (jobEmployeeIds.includes(e.id)) {
+            e.available = false
           }
         })
-
         schedule.push(Job({ buildingId: building.id, employeeIds: jobEmployeeIds }))
       }
     }
